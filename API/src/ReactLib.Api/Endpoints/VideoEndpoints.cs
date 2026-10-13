@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.Extensions.Options;
 using ReactLib.Api.Data;
 using ReactLib.Api.Model;
@@ -15,6 +16,8 @@ public static class VideoEndpoints
 
         videos.MapGet("", GetGrid);
         videos.MapGet("/{seq:int}", GetBySeq);
+        videos.MapPost("/{seq:int}/report", Report)
+            .RequireRateLimiting(SubmissionEndpoints.RateLimitPolicy);
 
         app.MapGet("/api/config", GetConfig);
     }
@@ -46,6 +49,13 @@ public static class VideoEndpoints
             "SELECT CAST(V AS int) FROM dbo.Meta WHERE K = 'CatalogVersion'", null, ct);
 
         return Results.Ok(new ApiConfig(options.Value.CopyFormat, version));
+    }
+
+    // a los 3 reportes el video vuelve a pendiente y desaparece de la grilla sin que nadie intervenga
+    private static async Task<IResult> Report(int seq, ISqlRunner sql, CancellationToken ct)
+    {
+        await sql.ExecuteAsync("dbo.ReportVideo", new { PubSeq = seq }, ct, CommandType.StoredProcedure);
+        return Results.NoContent();
     }
 
     private static GridSort ParseSort(string? sort) =>

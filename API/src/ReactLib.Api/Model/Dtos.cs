@@ -30,6 +30,39 @@ public sealed record IngestResponse(
     int? Seq,
     NearDuplicate? PossibleDuplicate);
 
+public sealed record VideoPreview(
+    string Handle,
+    string Title,
+    string? PosterUrl,
+    string? Mp4Url,
+    int? DurationMs,
+    short? Width,
+    short? Height);
+
+public sealed record SubmitResponse(
+    string Outcome,
+    VideoPreview? Preview,
+    NearDuplicate? PossibleDuplicate,
+    int? Seq,
+    string[]? ProposedTags);
+
+public sealed record ProposedTag(string Slug, int Videos);
+
+public sealed record PendingItem(
+    int VideoId,
+    string Handle,
+    long TweetId,
+    byte MediaIndex,
+    string Title,
+    string? TagsCsv,
+    string? PosterUrl,
+    string? Mp4Url,
+    short? Width,
+    short? Height,
+    int? DupOf,
+    byte? DupDist,
+    DateTime CreatedUtc);
+
 public sealed record MemoryInfo(
     long ManagedBytes,
     long CommittedBytes,
@@ -53,4 +86,12 @@ public sealed record MemoryInfo(
 [JsonSerializable(typeof(VxResponse))]
 [JsonSerializable(typeof(IngestResponse))]
 [JsonSerializable(typeof(IngestRequest))]
+[JsonSerializable(typeof(VideoPreview))]
+[JsonSerializable(typeof(SubmitResponse))]
+[JsonSerializable(typeof(SubmitRequest))]
+[JsonSerializable(typeof(ResolveRequest))]
+[JsonSerializable(typeof(ApproveRequest))]
+[JsonSerializable(typeof(TagSuggestion[]))]
+[JsonSerializable(typeof(PendingItem[]))]
+[JsonSerializable(typeof(ProposedTag[]))]
 public sealed partial class AppJson : JsonSerializerContext;

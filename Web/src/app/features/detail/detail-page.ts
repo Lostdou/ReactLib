@@ -17,6 +17,7 @@ export class DetailPageComponent {
   readonly video = signal<VideoCard | null>(null);
   readonly loading = signal(true);
   readonly notFound = signal(false);
+  readonly reported = signal(false);
 
   readonly aspectRatio = computed(() => {
     const current = this.video();
@@ -42,6 +43,20 @@ export class DetailPageComponent {
       copied ? 'Link copiado: pegalo en el texto de tu post' : 'No se pudo copiar',
       copied ? 'ok' : 'error',
     );
+  }
+
+  async report(): Promise<void> {
+    const current = this.video();
+    if (!current || this.reported()) return;
+
+    this.reported.set(true);
+    try {
+      await this.api.report(current.seq);
+      this.toast.show('Gracias: lo vamos a revisar');
+    } catch {
+      this.toast.show('No se pudo enviar el reporte', 'error');
+      this.reported.set(false);
+    }
   }
 
   private async fetch(seq: number): Promise<void> {

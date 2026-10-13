@@ -1,0 +1,125 @@
+<a class="back" routerLink="/">&#8592; Volver a la biblioteca</a>
+
+<h2>Sumar un video</h2>
+<p class="lead">
+  Pegá el link de un post de X que tenga el video que querés agregar. Se publica al instante.
+</p>
+
+@if (error(); as message) {
+  <p class="error">{{ message }}</p>
+}
+
+@switch (step()) {
+  @case ('url') {
+    <form class="url-form" (submit)="$event.preventDefault(); resolve()">
+      <input
+        type="url"
+        placeholder="https://x.com/usuario/status/123456789"
+        autocomplete="off"
+        required
+        [value]="url()"
+        (input)="url.set($any($event.target).value)"
+      />
+      <button type="submit" [disabled]="busy() || !url().trim()">
+        {{ busy() ? 'Buscando…' : 'Buscar video' }}
+      </button>
+    </form>
+  }
+
+  @case ('tags') {
+    @if (preview(); as item) {
+      <div class="preview">
+        <div class="preview-media">
+          @if (item.mp4Url) {
+            <video [src]="item.mp4Url" [poster]="item.posterUrl" controls muted playsinline loop></video>
+          }
+        </div>
+        <div>
+          <p class="preview-title">{{ item.title }}</p>
+          <p class="preview-handle">&#64;{{ item.handle }}</p>
+        </div>
+      </div>
+    }
+
+    <h3>Elegí hasta 5 tags</h3>
+    <p class="hint">
+      Usá los que ya existen siempre que puedas: así la gente encuentra las cosas. Si proponés uno
+      nuevo, el video se publica igual y el tag queda esperando revisión.
+    </p>
+
+    @if (chosenTags().length) {
+      <ul class="chosen">
+        @for (tag of chosenTags(); track tag) {
+          <li>
+            #{{ tag }}
+            <button type="button" (click)="removeTag(tag)" aria-label="Quitar">&#215;</button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (canAddMore()) {
+      <input
+        class="tag-input"
+        type="text"
+        placeholder="Buscar o proponer un tag…"
+        autocomplete="off"
+        [value]="tagInput()"
+        (input)="onTagInput($any($event.target).value)"
+        (keydown.enter)="$event.preventDefault(); addTag(tagInput())"
+      />
+
+      <ul class="suggestions">
+        @for (suggestion of suggestions(); track suggestion.name) {
+          <li>
+            <button type="button" (click)="addTag(suggestion.name)">
+              #{{ suggestion.name }} <span>{{ suggestion.uses }}</span>
+            </button>
+          </li>
+        }
+
+        @if (normalized().length > 1 && !isKnownTag()) {
+          <li>
+            <button type="button" class="new" (click)="addTag(normalized())">
+              proponer #{{ normalized() }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <div class="actions">
+      <button type="button" class="primary" [disabled]="busy()" (click)="submit()">
+        {{ busy() ? 'Publicando…' : 'Publicar' }}
+      </button>
+      <button type="button" (click)="restart()">Cancelar</button>
+    </div>
+  }
+
+  @case ('done') {
+    @if (result(); as response) {
+      <div class="done">
+        <h3>¡Listo, ya está en la biblioteca!</h3>
+
+        @if (response.seq) {
+          <a class="primary" [routerLink]="['/v', response.seq]">Ver el video</a>
+        }
+
+        @if (response.proposedTags?.length) {
+          <p class="hint">
+            Estos tags todavía no existían y quedaron esperando revisión:
+            @for (tag of response.proposedTags; track tag) { <strong>#{{ tag }}</strong> }
+          </p>
+        }
+
+        @if (response.possibleDuplicate; as duplicate) {
+          <p class="hint">
+            Puede que sea parecido a <a [routerLink]="['/v', duplicate.seq]">{{ duplicate.title }}</a>.
+          </p>
+        }
+
+        <button type="button" (click)="restart()">Sumar otro</button>
+      </div>
+    }
+  }
+}

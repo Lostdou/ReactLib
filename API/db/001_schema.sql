@@ -35,6 +35,7 @@ CREATE TABLE dbo.Video (
     Title           nvarchar(80)  NOT NULL,
     SearchBlob      varchar(200)  NOT NULL,        -- evita full-text, que no esta instalado en el plan gratuito
     TagsCsv         varchar(160)  NULL,            -- denormalizado para que el indice covering resuelva la grilla sin join
+    ProposedTags    varchar(160)  NULL,            -- tags que todavia no existen: nacen solo si un humano los aprueba
     PosterPath      varchar(120)  NULL,            -- sin host: lo reconstruye la API y ahorra ~40 B por fila indexada
     Mp4Path         varchar(200)  NULL,
     DurationMs      int           NULL,

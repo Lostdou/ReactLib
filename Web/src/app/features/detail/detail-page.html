@@ -33,6 +33,10 @@
         <a class="original" [href]="item.tweetUrl" target="_blank" rel="noopener noreferrer">Ver original en X</a>
       </div>
 
+      <button type="button" class="report" [disabled]="reported()" (click)="report()">
+        {{ reported() ? 'Reportado' : 'Reportar este video' }}
+      </button>
+
       <p class="hint">
         Pegá el link en el texto de tu post en X y el video se adjunta solo, con la atribución a
         &#64;{{ item.handle }}. No hace falta subir nada ni citar.

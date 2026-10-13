@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using ReactLib.Api.Data;
@@ -31,6 +32,19 @@ builder.Services.AddHttpClient<ITweetMetadataResolver, TweetMetadataResolver>(ht
 });
 
 builder.Services.AddScoped<VideoIngestor>();
+builder.Services.AddScoped<SubmissionService>();
+builder.Services.AddSingleton<TagCatalog>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<TagCatalog>());
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(SubmissionEndpoints.RateLimitPolicy, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            // la IP sale de X-Forwarded-For via UseForwardedHeaders: detras de IIS la directa es el proxy
+            context.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromHours(1) }));
+});
 
 builder.Services.AddCors(options => options.AddPolicy(WebCorsPolicy, policy =>
 {
@@ -52,9 +66,11 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 app.UseCors(WebCorsPolicy);
+app.UseRateLimiter();
 
 app.MapHealth();
 app.MapVideos();
+app.MapSubmissions();
 app.MapAdmin();
 
 app.Run();

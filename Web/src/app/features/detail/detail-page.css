@@ -112,3 +112,20 @@
   font-size: 0.85rem;
   line-height: 1.5;
 }
+
+.report {
+  margin-top: 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.report:disabled {
+  cursor: default;
+  text-decoration: none;
+}
