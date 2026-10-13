@@ -2,8 +2,8 @@
   <a class="brand" routerLink="/">
     <span class="brand-mark">▶</span>
     <span>
-      <strong>Reaction Library</strong>
-      <small>videos de X listos para pegar</small>
+      <strong>Videos de Twitter</strong>
+      <small>copiás el link y lo pegás en tu post</small>
     </span>
   </a>
 </header>
@@ -13,12 +13,18 @@
 </main>
 
 <footer class="site-footer">
-  <p>
-    No alojamos ningún video: todo apunta al CDN de X y la atribución al autor la muestra el
-    reproductor.
-  </p>
+  <div class="footer-text">
+    <p class="credit">
+      Hecho por
+      <a href="https://x.com/nosoylostdou" target="_blank" rel="noopener noreferrer">&#64;nosoylostdou</a>
+    </p>
+    <p class="disclaimer">
+      No alojamos ningún video: todo apunta al CDN de X y la atribución al autor la muestra el
+      reproductor.
+    </p>
+  </div>
   <a [href]="hitsLink" target="_blank" rel="noopener noreferrer">
-    <img [src]="hitsBadge" alt="visitas" width="110" height="20" (error)="hideBadge($event)" />
+    <img [src]="hitsBadge" alt="visitas" width="86" height="20" (error)="hideBadge($event)" />
   </a>
 </footer>
 

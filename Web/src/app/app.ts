@@ -12,7 +12,7 @@ import { Toast } from './core/toast';
 })
 export class App {
   readonly toast = inject(Toast);
-  readonly hitsBadge = `https://hits.sh/${environment.hitsKey}.svg?view=today-total&style=flat-square&label=visitas`;
+  readonly hitsBadge = `https://hits.sh/${environment.hitsKey}.svg?style=flat-square&label=visitas`;
   readonly hitsLink = `https://hits.sh/${environment.hitsKey}/`;
 
   hideBadge(event: Event): void {

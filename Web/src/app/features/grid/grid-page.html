@@ -37,7 +37,7 @@
       <div class="skeleton"></div>
     }
   </div>
-} @else if (store.isEmpty()) {
+} @else if (store.isEmpty() && !store.error()) {
   <p class="empty">
     No hay nada con esa búsqueda todavía.
     <a routerLink="/" [queryParams]="{ q: null, tag: null }">Ver todo</a>

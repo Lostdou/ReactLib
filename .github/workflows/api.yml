@@ -34,11 +34,29 @@ jobs:
           }
           $settings | ConvertTo-Json -Depth 4 | Set-Content publish/appsettings.Production.json -Encoding utf8
 
+      # msdeploy directo y no una action: el endpoint de MonsterASP escucha en el 8172 (WMSVC)
+      # y las actions de web deploy arman la URL contra el puerto 80, que devuelve 404
       - name: Deploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
-        with:
-          website-name: ${{ secrets.MONSTERASP_WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.MONSTERASP_SERVER }}
-          server-username: ${{ secrets.MONSTERASP_USERNAME }}
-          server-password: ${{ secrets.MONSTERASP_PASSWORD }}
-          source-path: publish
+        shell: pwsh
+        env:
+          SITE: ${{ secrets.MONSTERASP_WEBSITE_NAME }}
+          SERVER: ${{ secrets.MONSTERASP_SERVER }}
+          DEPLOY_USER: ${{ secrets.MONSTERASP_USERNAME }}
+          DEPLOY_PASS: ${{ secrets.MONSTERASP_PASSWORD }}
+        run: |
+          $msdeploy = 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe'
+          if (-not (Test-Path $msdeploy)) { throw "msdeploy no encontrado en $msdeploy" }
+
+          $endpoint = "https://$($env:SERVER):8172/msdeploy.axd?site=$($env:SITE)"
+          $dest = "contentPath=$($env:SITE),computerName=$endpoint,userName=$($env:DEPLOY_USER),password=$($env:DEPLOY_PASS),authType=Basic"
+
+          # AppOffline primero: sin eso el ReactLib.Api.dll en uso bloquea la copia
+          & $msdeploy `
+            '-verb:sync' `
+            "-source:contentPath=$PWD\publish" `
+            "-dest:$dest" `
+            '-enableRule:AppOffline' `
+            '-allowUntrusted' `
+            '-retryAttempts:3'
+
+          if ($LASTEXITCODE -ne 0) { throw "msdeploy terminó con código $LASTEXITCODE" }

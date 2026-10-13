@@ -59,9 +59,28 @@
   font-size: 0.8rem;
 }
 
+.footer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 60ch;
+}
+
 .site-footer p {
   margin: 0;
-  max-width: 60ch;
+}
+
+.credit {
+  color: var(--text-muted);
+}
+
+.credit a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
 }
 
 .toast {
