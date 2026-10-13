@@ -1,6 +1,6 @@
 # Twitter Reaction Library
 
-[![visitas](https://hits.sh/github.com/facundo/twitter-reaction-library.svg?style=flat-square&label=visitas)](https://hits.sh/github.com/facundo/twitter-reaction-library/)
+[![visitas](https://hits.sh/reactlib.lostdou.dev.svg?style=flat-square&label=visitas)](https://hits.sh/reactlib.lostdou.dev/)
 
 Catálogo buscable de videos de reacción de X. Copiás el link de un video, lo pegás en el texto de
 tu post y **X adjunta ese video ya subido**, con la atribución nativa al autor en el reproductor,
@@ -53,6 +53,11 @@ numeración a propósito: los TweetId son inventados y no resuelven a nada.
 > Para correr SQL a mano contra estas tablas hace falta `SET QUOTED_IDENTIFIER ON`, porque casi
 > todos los índices son filtrados. SqlClient ya lo manda; sqlcmd no.
 
+> El dHash de la miniatura lo calcula **el browser** (`Web/src/app/core/dhash.ts`) y viaja como
+> string en el campo `dhash`: así la caja de 256 MB nunca decodifica una imagen, y evitamos a
+> ImageSharp, que es vulnerable hasta la 2.x y pide clave de licencia de la 3.x en adelante. Si el
+> hash no viene, la fila simplemente queda fuera del dedup perceptual.
+
 > `video.twimg.com` devuelve **403 si le llega un `Referer`**. Por eso `index.html` declara
 > `<meta name="referrer" content="no-referrer">`: sin eso no se reproduce ningún video. El CDN de
 > imágenes (`pbs.twimg.com`) no tiene esa restricción.
@@ -94,7 +99,7 @@ El publish profile (`API/WebDeploy.publishSettings`) está en `.gitignore` y **n
 |---|---|---|
 | 0 | Esqueleto, esquema, health, CORS, workflows | listo |
 | 1 | Catálogo read-only: grilla, detalle, botón copiar | listo |
-| 2 | Metadata vía fxtwitter/vxtwitter + dHash + dedup | listo |
+| 2 | Metadata vía fxtwitter/vxtwitter + dedup en 3 capas | listo |
 | 3 | Ingesta pública con moderación | pendiente |
 | 4 | Tags, búsqueda y autocomplete | parcial (falta autocomplete) |
 | 5 | Output cache en disco, ETag, contador de copiados | pendiente |

@@ -1,4 +1,5 @@
 using System.Data;
+using System.Numerics;
 using Dapper;
 using ReactLib.Api.Data;
 using ReactLib.Api.Model;
@@ -16,13 +17,15 @@ public sealed record IngestResult(
 public sealed class VideoIngestor(
     ISqlRunner sql,
     ITweetMetadataResolver resolver,
-    IThumbnailHasher hasher,
     ILogger<VideoIngestor> log)
 {
     private const int MaxTitleLength = 80;
     private const int DuplicateThreshold = 8;
+    private const int MinDistinctiveBits = 8;
+    private const int MaxDistinctiveBits = 56;
 
-    public async Task<IngestResult> IngestAsync(string url, string? title, string? tags, CancellationToken ct)
+    public async Task<IngestResult> IngestAsync(
+        string url, string? title, string? tags, long? dhash, CancellationToken ct)
     {
         if (!TweetUrl.TryParse(url, out var tweet)) return new IngestResult(IngestOutcome.InvalidUrl);
 
@@ -35,13 +38,24 @@ public sealed class VideoIngestor(
         if (metadata.MediaKey is { } mediaKey && await FindByMediaKeyAsync(mediaKey, ct) is { } republished)
             return new IngestResult(IngestOutcome.AlreadyExists, republished);
 
-        var hash = metadata.PosterPath is null ? null : await hasher.HashAsync(metadata.PosterPath, ct);
+        // el hash lo calcula el browser sobre el poster: pbs.twimg.com habilita CORS, y asi la caja
+        // de 256 MB nunca decodifica una imagen. Si no viene, la fila queda fuera del dedup perceptual
+        var hash = IsDistinctive(dhash) ? dhash : null;
         var nearDuplicate = hash is null ? null : await FindNearDuplicateAsync(hash.Value, ct);
 
         var seq = await PublishAsync(metadata, TitleFor(metadata, title), tags, hash, ct);
         log.LogInformation("publicado {Seq} ({Handle}/{TweetId})", seq, metadata.Handle, metadata.TweetId);
 
         return new IngestResult(IngestOutcome.Published, seq, nearDuplicate);
+    }
+
+    // un frame plano (fade a negro, pantalla blanca) matchearia contra todo el catalogo
+    private static bool IsDistinctive(long? hash)
+    {
+        if (hash is null) return false;
+
+        var bits = BitOperations.PopCount((ulong)hash.Value);
+        return bits is >= MinDistinctiveBits and <= MaxDistinctiveBits;
     }
 
     private static string TitleFor(TweetMetadata metadata, string? requested)

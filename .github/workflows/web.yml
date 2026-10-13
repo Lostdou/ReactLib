@@ -15,6 +15,9 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  CUSTOM_DOMAIN: reactlib.lostdou.dev
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,17 +35,15 @@ jobs:
 
       - run: npm ci
 
-      - name: Build
-        env:
-          # un repo <usuario>.github.io se sirve en la raiz; el resto cuelga de /<repo>/
-          BASE_HREF: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
-        run: npx ng build --configuration production --base-href "$BASE_HREF"
+      # con dominio propio el sitio vive en la raiz, no en /<repo>/
+      - run: npx ng build --configuration production --base-href "/"
 
-      - name: Fallback de rutas y sin Jekyll
+      - name: Fallback de rutas, dominio y sin Jekyll
         run: |
           # Pages sirve 404.html para cualquier ruta desconocida y asi el router resuelve deep links
           cp dist/reactlib-web/browser/index.html dist/reactlib-web/browser/404.html
           touch dist/reactlib-web/browser/.nojekyll
+          echo "$CUSTOM_DOMAIN" > dist/reactlib-web/browser/CNAME
 
       - uses: actions/upload-pages-artifact@v3
         with:

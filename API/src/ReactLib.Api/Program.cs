@@ -5,8 +5,6 @@ using ReactLib.Api.Endpoints;
 using ReactLib.Api.Ingest;
 using ReactLib.Api.Model;
 using ReactLib.Api.Shared;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Memory;
 
 const string WebCorsPolicy = "web";
 
@@ -31,19 +29,7 @@ builder.Services.AddHttpClient<ITweetMetadataResolver, TweetMetadataResolver>(ht
     http.DefaultRequestHeaders.UserAgent.ParseAdd("reactlib/0.1");
 });
 
-builder.Services.AddHttpClient<IThumbnailHasher, ThumbnailHasher>(http =>
-{
-    http.Timeout = TimeSpan.FromSeconds(8);
-    http.MaxResponseContentBufferSize = 256 * 1024;
-});
-
 builder.Services.AddScoped<VideoIngestor>();
-
-// capear el allocator importa mas que el decode en si: un JPEG grande se va derecho al LOH
-Configuration.Default.MemoryAllocator = MemoryAllocator.Create(new MemoryAllocatorOptions
-{
-    AllocationLimitMegabytes = 16,
-});
 
 builder.Services.AddCors(options => options.AddPolicy(WebCorsPolicy, policy =>
 {

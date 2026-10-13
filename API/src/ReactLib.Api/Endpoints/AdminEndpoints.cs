@@ -5,7 +5,7 @@ using ReactLib.Api.Shared;
 
 namespace ReactLib.Api.Endpoints;
 
-public sealed record IngestRequest(string Url, string? Title, string? Tags);
+public sealed record IngestRequest(string Url, string? Title, string? Tags, long? Dhash);
 
 public static class AdminEndpoints
 {
@@ -21,7 +21,7 @@ public static class AdminEndpoints
         VideoIngestor ingestor,
         CancellationToken ct)
     {
-        var result = await ingestor.IngestAsync(request.Url, request.Title, request.Tags, ct);
+        var result = await ingestor.IngestAsync(request.Url, request.Title, request.Tags, request.Dhash, ct);
         var body = new IngestResponse(result.Outcome.ToString(), result.Seq, result.Duplicate);
 
         return result.Outcome switch

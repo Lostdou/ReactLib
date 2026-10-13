@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using ReactLib.Api.Endpoints;
 using ReactLib.Api.Ingest;
 
 namespace ReactLib.Api.Model;
@@ -38,9 +39,11 @@ public sealed record MemoryInfo(
     int Gen1,
     int Gen2);
 
+// el dhash son 64 bits y viaja como string: un number de JS pierde precision arriba de 2^53
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    NumberHandling = JsonNumberHandling.AllowReadingFromString)]
 [JsonSerializable(typeof(VideoCard))]
 [JsonSerializable(typeof(GridPage))]
 [JsonSerializable(typeof(ApiConfig))]
@@ -49,4 +52,5 @@ public sealed record MemoryInfo(
 [JsonSerializable(typeof(FxResponse))]
 [JsonSerializable(typeof(VxResponse))]
 [JsonSerializable(typeof(IngestResponse))]
+[JsonSerializable(typeof(IngestRequest))]
 public sealed partial class AppJson : JsonSerializerContext;
