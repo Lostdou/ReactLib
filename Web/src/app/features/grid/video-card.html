@@ -1,5 +1,5 @@
 <article class="card" (mouseenter)="startPreview()" (mouseleave)="stopPreview()">
-  <a class="media" [routerLink]="['/v', video().seq]" [style.aspect-ratio]="aspectRatio()">
+  <a class="media" [routerLink]="['/v', video().seq]">
     @if (video().posterUrl) {
       <img [src]="video().posterUrl" [alt]="video().title" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
     } @else {

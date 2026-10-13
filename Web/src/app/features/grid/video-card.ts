@@ -5,8 +5,6 @@ import { VideoCard } from '../../core/models';
 import { Preview } from '../../core/preview';
 import { Toast } from '../../core/toast';
 
-const FALLBACK_RATIO = '1 / 1';
-
 @Component({
   selector: 'rl-video-card',
   imports: [RouterLink],
@@ -20,11 +18,6 @@ export class VideoCardComponent {
   private readonly preview = inject(Preview);
   private readonly toast = inject(Toast);
   private readonly previewEl = viewChild<ElementRef<HTMLVideoElement>>('previewEl');
-
-  readonly aspectRatio = computed(() => {
-    const { width, height } = this.video();
-    return width && height ? `${width} / ${height}` : FALLBACK_RATIO;
-  });
 
   readonly duration = computed(() => {
     const ms = this.video().durationMs;

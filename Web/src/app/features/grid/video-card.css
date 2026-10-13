@@ -1,4 +1,5 @@
 .card {
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -13,9 +14,11 @@
   transform: translateY(-2px);
 }
 
+/* tile uniforme: los videos van de 1:1 a 16:9 y con el ratio nativo ninguna fila alinea */
 .media {
   position: relative;
   display: block;
+  aspect-ratio: 1 / 1;
   background: var(--surface-sunken);
   overflow: hidden;
 }
@@ -69,7 +72,12 @@
 }
 
 .title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-height: 2.6em;
   margin: 0;
+  overflow: hidden;
   font-size: 0.95rem;
   line-height: 1.3;
   color: var(--text);
@@ -81,13 +89,18 @@
   color: var(--text-muted);
 }
 
+/* una sola fila: si los tags envuelven, la card vuelve a cambiar de alto */
 .tags {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.3rem;
   margin: 0.15rem 0 0;
   padding: 0;
+  overflow: hidden;
   list-style: none;
+}
+
+.tags li {
+  flex: 0 0 auto;
 }
 
 .tags a {
