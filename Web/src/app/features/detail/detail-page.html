@@ -1,0 +1,42 @@
+<a class="back" routerLink="/">&#8592; Volver a la biblioteca</a>
+
+@if (loading()) {
+  <div class="placeholder">Cargando…</div>
+} @else if (notFound()) {
+  <p class="placeholder">Ese video no existe o lo dimos de baja.</p>
+} @else if (video(); as item) {
+  <article class="detail">
+    <div class="player" [style.aspect-ratio]="aspectRatio()">
+      @if (item.mp4Url) {
+        <video [src]="item.mp4Url" [poster]="item.posterUrl" controls muted playsinline loop></video>
+      } @else if (item.posterUrl) {
+        <img [src]="item.posterUrl" [alt]="item.title" />
+      } @else {
+        <span class="no-media">Sin preview disponible</span>
+      }
+    </div>
+
+    <div class="info">
+      <h2>{{ item.title }}</h2>
+      <p class="handle">&#64;{{ item.handle }}</p>
+
+      @if (item.tags.length) {
+        <ul class="tags">
+          @for (tag of item.tags; track tag) {
+            <li><a routerLink="/" [queryParams]="{ tag: tag }">#{{ tag }}</a></li>
+          }
+        </ul>
+      }
+
+      <div class="actions">
+        <button type="button" class="copy" (click)="copy()">Copiar link</button>
+        <a class="original" [href]="item.tweetUrl" target="_blank" rel="noopener noreferrer">Ver original en X</a>
+      </div>
+
+      <p class="hint">
+        Pegá el link en el texto de tu post en X y el video se adjunta solo, con la atribución a
+        &#64;{{ item.handle }}. No hace falta subir nada ni citar.
+      </p>
+    </div>
+  </article>
+}

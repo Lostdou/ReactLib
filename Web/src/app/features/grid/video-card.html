@@ -1,0 +1,37 @@
+<article class="card" (mouseenter)="startPreview()" (mouseleave)="stopPreview()">
+  <a class="media" [routerLink]="['/v', video().seq]" [style.aspect-ratio]="aspectRatio()">
+    @if (video().posterUrl) {
+      <img [src]="video().posterUrl" [alt]="video().title" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+    } @else {
+      <span class="media-fallback" aria-hidden="true">{{ initial() }}</span>
+    }
+
+    @if (video().mp4Url) {
+      <video #previewEl class="preview" muted playsinline preload="none"></video>
+    }
+
+    @if (duration()) {
+      <span class="duration">{{ duration() }}</span>
+    }
+  </a>
+
+  <div class="body">
+    <h3 class="title">{{ video().title }}</h3>
+    <p class="handle">&#64;{{ video().handle }}</p>
+
+    @if (video().tags.length) {
+      <ul class="tags">
+        @for (tag of video().tags; track tag) {
+          <li>
+            <a [routerLink]="[]" [queryParams]="{ tag: tag, q: null }" queryParamsHandling="merge">#{{ tag }}</a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="actions">
+    <button type="button" class="copy" (click)="copy()">Copiar link</button>
+    <a class="original" [href]="video().tweetUrl" target="_blank" rel="noopener noreferrer">Original</a>
+  </div>
+</article>

@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+publish/
+App_Data/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+appsettings.Production.json
+appsettings.Local.json
+*.pubxml
+*.PublishSettings
+*.publishSettings
+WebDeploy.publishSettings
+
+# IDE / SO
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -1,0 +1,46 @@
+name: API → MonsterASP
+
+on:
+  push:
+    branches: [main]
+    paths: ['API/**', '.github/workflows/api.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - run: dotnet restore API/ReactLib.slnx
+
+      - run: dotnet build API/ReactLib.slnx -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish API/src/ReactLib.Api/ReactLib.Api.csproj -c Release --no-build -o publish
+
+      # los secretos se escriben recien en el artefacto: nunca existen en el repo ni en su historial
+      - name: Generar appsettings.Production.json
+        shell: pwsh
+        env:
+          DB_CONNECTION: ${{ secrets.RL_CONNECTION_STRING }}
+          ADMIN_KEY: ${{ secrets.RL_ADMIN_KEY }}
+        run: |
+          $settings = @{
+            ConnectionStrings = @{ Db = $env:DB_CONNECTION }
+            Api               = @{ AdminKey = $env:ADMIN_KEY }
+          }
+          $settings | ConvertTo-Json -Depth 4 | Set-Content publish/appsettings.Production.json -Encoding utf8
+
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.MONSTERASP_WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.MONSTERASP_SERVER }}
+          server-username: ${{ secrets.MONSTERASP_USERNAME }}
+          server-password: ${{ secrets.MONSTERASP_PASSWORD }}
+          source-path: publish

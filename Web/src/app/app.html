@@ -1,0 +1,27 @@
+<header class="site-header">
+  <a class="brand" routerLink="/">
+    <span class="brand-mark">▶</span>
+    <span>
+      <strong>Reaction Library</strong>
+      <small>videos de X listos para pegar</small>
+    </span>
+  </a>
+</header>
+
+<main class="site-main">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <p>
+    No alojamos ningún video: todo apunta al CDN de X y la atribución al autor la muestra el
+    reproductor.
+  </p>
+  <a [href]="hitsLink" target="_blank" rel="noopener noreferrer">
+    <img [src]="hitsBadge" alt="visitas" width="110" height="20" (error)="hideBadge($event)" />
+  </a>
+</footer>
+
+@if (toast.current(); as message) {
+  <div class="toast" [class.error]="message.tone === 'error'" role="status">{{ message.text }}</div>
+}

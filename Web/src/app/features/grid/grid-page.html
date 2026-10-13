@@ -1,0 +1,57 @@
+<section class="controls">
+  <input
+    type="search"
+    class="search"
+    placeholder="Buscar: gato, llanto, me voy..."
+    autocomplete="off"
+    [value]="search()"
+    (input)="onSearchInput($any($event.target).value)"
+  />
+
+  <div class="sorts" role="group" aria-label="Orden">
+    <button type="button" [class.active]="store.query().sort === 'new'" (click)="setSort('new')">Recientes</button>
+    <button type="button" [class.active]="store.query().sort === 'top'" (click)="setSort('top')">Más usados</button>
+  </div>
+</section>
+
+@if (store.query().tag) {
+  <p class="active-filter">
+    Filtrando por <strong>#{{ store.query().tag }}</strong>
+    <button type="button" (click)="clearTag()">quitar</button>
+  </p>
+}
+
+@if (store.slowness() !== 'none') {
+  <p class="waking">
+    {{ store.slowness() === 'waking' ? 'Despertando el servidor, va a tardar unos segundos…' : 'Sigue despertando… ya falta poco.' }}
+  </p>
+}
+
+@if (store.error(); as message) {
+  <p class="error">{{ message }}</p>
+}
+
+@if (store.loading() && store.items().length === 0) {
+  <div class="grid">
+    @for (slot of skeletons; track $index) {
+      <div class="skeleton"></div>
+    }
+  </div>
+} @else if (store.isEmpty()) {
+  <p class="empty">
+    No hay nada con esa búsqueda todavía.
+    <a routerLink="/" [queryParams]="{ q: null, tag: null }">Ver todo</a>
+  </p>
+} @else {
+  <div class="grid">
+    @for (video of store.items(); track video.seq) {
+      <rl-video-card [video]="video" />
+    }
+  </div>
+
+  @if (store.hasMore()) {
+    <button type="button" class="more" [disabled]="store.loadingMore()" (click)="store.loadMore()">
+      {{ store.loadingMore() ? 'Cargando…' : 'Cargar más' }}
+    </button>
+  }
+}

@@ -1,0 +1,59 @@
+name: Web → GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['Web/**', '.github/workflows/web.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Web/package-lock.json
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          # un repo <usuario>.github.io se sirve en la raiz; el resto cuelga de /<repo>/
+          BASE_HREF: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
+        run: npx ng build --configuration production --base-href "$BASE_HREF"
+
+      - name: Fallback de rutas y sin Jekyll
+        run: |
+          # Pages sirve 404.html para cualquier ruta desconocida y asi el router resuelve deep links
+          cp dist/reactlib-web/browser/index.html dist/reactlib-web/browser/404.html
+          touch dist/reactlib-web/browser/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: Web/dist/reactlib-web/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
