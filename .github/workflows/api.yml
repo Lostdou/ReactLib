@@ -31,10 +31,11 @@ jobs:
         env:
           DB_CONNECTION: ${{ secrets.RL_CONNECTION_STRING }}
           ADMIN_KEY: ${{ secrets.RL_ADMIN_KEY }}
+          IP_HASH_SALT: ${{ secrets.RL_IP_HASH_SALT }}
         run: |
           $settings = @{
             ConnectionStrings = @{ Db = $env:DB_CONNECTION }
-            Api               = @{ AdminKey = $env:ADMIN_KEY }
+            Api               = @{ AdminKey = $env:ADMIN_KEY; IpHashSalt = $env:IP_HASH_SALT }
           }
           $settings | ConvertTo-Json -Depth 4 | Set-Content publish/appsettings.Production.json -Encoding utf8
 

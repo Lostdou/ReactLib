@@ -100,6 +100,7 @@ Secrets que hay que cargar en el repo (Settings → Secrets and variables → Ac
 | `MONSTERASP_PASSWORD` | `userPWD` del publish profile |
 | `RL_CONNECTION_STRING` | panel de MonsterASP → Databases |
 | `RL_ADMIN_KEY` | lo generás vos: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
+| `RL_IP_HASH_SALT` | ídem, y una vez cargado no se rota: rotarlo invalida los hashes guardados |
 
 El publish profile (`API/WebDeploy.publishSettings`) está en `.gitignore` y **no debe commitearse**.
 
@@ -127,3 +128,8 @@ satisfacer, no inicializa.
 | 4 | Tags, búsqueda y autocomplete | listo |
 | 5 | Output cache en disco, ETag, contador de copiados | pendiente |
 | 6 | Link rot, decay, prerender, backup | pendiente |
+
+## Licencia
+
+MIT: podés forkearlo, modificarlo y usarlo, incluso comercialmente, manteniendo el aviso de
+copyright. Ver [LICENSE](LICENSE).

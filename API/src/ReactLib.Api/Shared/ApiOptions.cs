@@ -11,6 +11,7 @@ public sealed class ApiOptions
     public string CopyFormat { get; init; } = CopyFormats.Media;
     public string[] AllowedOrigins { get; init; } = [];
     public string AdminKey { get; init; } = "";
+    public string IpHashSalt { get; init; } = "";
 }
 
 public static class AdminKey

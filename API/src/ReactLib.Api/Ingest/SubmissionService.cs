@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using Dapper;
+using Microsoft.Extensions.Options;
 using ReactLib.Api.Data;
 using ReactLib.Api.Model;
 using ReactLib.Api.Shared;
@@ -23,6 +24,7 @@ public sealed record PublishedRow(int PubSeq, string? ProposedTags);
 public sealed class SubmissionService(
     ISqlRunner sql,
     ITweetMetadataResolver resolver,
+    IOptions<ApiOptions> options,
     ILogger<SubmissionService> log)
 {
     private const int MaxTitleLength = 80;
@@ -148,12 +150,15 @@ public sealed class SubmissionService(
         return sql.QuerySingleOrDefaultAsync<PublishedRow>("dbo.SubmitVideo", parameters, ct, CommandType.StoredProcedure);
     }
 
-    // truncado a 8 bytes: alcanza para banear reincidentes sin guardar la IP en claro
-    private static byte[]? HashIp(string? ip)
+    // truncado a 8 bytes: alcanza para banear reincidentes sin guardar la IP en claro.
+    // Sin salt no guardamos nada: el espacio IPv4 entero se recorre en minutos, asi que un
+    // hash con salt conocido es una IP en claro con pasos extra
+    private byte[]? HashIp(string? ip)
     {
-        if (string.IsNullOrEmpty(ip)) return null;
+        var salt = options.Value.IpHashSalt;
+        if (string.IsNullOrEmpty(ip) || string.IsNullOrEmpty(salt)) return null;
 
-        var digest = SHA256.HashData(Encoding.UTF8.GetBytes("reactlib:" + ip));
+        var digest = HMACSHA256.HashData(Encoding.UTF8.GetBytes(salt), Encoding.UTF8.GetBytes(ip));
         return digest[..8];
     }
 }
