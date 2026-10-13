@@ -1,12 +1,14 @@
-# Twitter Reaction Library
+# ReactLib
 
 [![visitas](https://hits.sh/reactlib.lostdou.dev.svg?style=flat-square&label=visitas)](https://hits.sh/reactlib.lostdou.dev/)
+
+**[reactlib.lostdou.dev](https://reactlib.lostdou.dev)**
 
 Catálogo buscable de videos de reacción de X. Copiás el link de un video, lo pegás en el texto de
 tu post y **X adjunta ese video ya subido**, con la atribución nativa al autor en el reproductor,
 sin re-subir nada y sin citar.
 
-El truco es el formato de la URL:
+El truco está en el formato de la URL:
 
 ```
 https://x.com/<usuario>/status/<tweetId>/video/<n>
@@ -14,120 +16,21 @@ https://x.com/<usuario>/status/<tweetId>/video/<n>
 
 No alojamos media: la base guarda solo URLs y metadata, y las imágenes y videos salen del CDN de X.
 
+Cualquiera puede publicar sin registrarse. Los tags son la única compuerta: los que ya existen se
+aplican solos, los nuevos quedan propuestos hasta que se aprueban, así la taxonomía no se llena de
+sinónimos y la búsqueda sigue sirviendo.
+
 ## Stack
 
 | Capa | Tecnología | Dónde vive |
 |---|---|---|
-| Base | SQL Server 2025 | MonsterASP (plan gratuito, 1 GB) |
+| Base | SQL Server | MonsterASP (plan gratuito, 1 GB) |
 | API | .NET 10, Minimal API + Dapper | MonsterASP (256 MB RAM) |
 | Front | Angular 22 standalone, CSS puro | GitHub Pages |
 
-## Correr local
-
-```bash
-# 1. base
-sqlcmd -S localhost -E -C -Q "IF DB_ID('reactlib') IS NULL CREATE DATABASE reactlib;"
-sqlcmd -S localhost -E -C -d reactlib -i API/db/001_schema.sql
-sqlcmd -S localhost -E -C -d reactlib -i API/db/002_publish.sql
-sqlcmd -S localhost -E -C -d reactlib -i API/db/dev_seed.sql   # datos falsos, solo local
-
-# 2. API en http://localhost:5080
-dotnet run --project API/src/ReactLib.Api
-
-# 3. front en http://localhost:4200
-cd Web && npm start
-```
-
-Para cargar videos reales, con la API levantada y `Api__AdminKey` seteada:
-
-```bash
-curl -X POST http://localhost:5080/api/admin/videos \
-  -H "X-Admin-Key: $ADMIN_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://x.com/usuario/status/123","tags":"gato, indiferencia"}'
-```
-
-Los scripts de `API/db/` son idempotentes y están numerados. `dev_seed.sql` queda fuera de esa
-numeración a propósito: los TweetId son inventados y no resuelven a nada.
-
-> Para correr SQL a mano contra estas tablas hace falta `SET QUOTED_IDENTIFIER ON`, porque casi
-> todos los índices son filtrados. SqlClient ya lo manda; sqlcmd no.
-
-> El dHash de la miniatura lo calcula **el browser** (`Web/src/app/core/dhash.ts`) y viaja como
-> string en el campo `dhash`: así la caja de 256 MB nunca decodifica una imagen, y evitamos a
-> ImageSharp, que es vulnerable hasta la 2.x y pide clave de licencia de la 3.x en adelante. Si el
-> hash no viene, la fila simplemente queda fuera del dedup perceptual.
-
-> `video.twimg.com` devuelve **403 si le llega un `Referer`**. Por eso `index.html` declara
-> `<meta name="referrer" content="no-referrer">`: sin eso no se reproduce ningún video. El CDN de
-> imágenes (`pbs.twimg.com`) no tiene esa restricción.
-
-## Cómo entra el contenido
-
-Cualquiera publica sin registrarse desde `/sumar`: pega el link de un post de X, el servidor resuelve
-el video y se publica al instante. Lo que **no** es libre son los tags.
-
-- Un tag que ya existe se aplica solo.
-- Uno que no existe **no se crea**: queda en `Video.ProposedTags` y el video se publica igual. Recién
-  nace cuando se aprueba desde `/api/admin/proposed-tags`, y ahí se enlaza a todos los videos que lo
-  habían propuesto.
-- Tres reportes devuelven un video a pendiente y lo sacan de la grilla sin intervención.
-- Rate limit de 10 envíos por hora por IP.
-
-**Why:** sin esa compuerta la taxonomía se llena de sinónimos en una semana y la búsqueda deja de
-servir, que es justo lo que hace útil a una biblioteca.
-
-> Los scripts de `API/db/` **no se aplican solos en el deploy**: hay que correrlos a mano contra la
-> base de producción antes de desplegar código que los use.
-
-## Deploy
-
-Dos workflows independientes, cada uno disparado por cambios en su carpeta:
-
-- `.github/workflows/web.yml` → GitHub Pages. Calcula el `base-href` solo y copia `index.html` a
-  `404.html` para que anden los deep links.
-- `.github/workflows/api.yml` → MonsterASP vía WebDeploy. Escribe `appsettings.Production.json`
-  desde los secrets **recién en el artefacto publicado**, así las credenciales nunca existen en el
-  repo ni en su historial.
-
-Secrets que hay que cargar en el repo (Settings → Secrets and variables → Actions):
-
-| Secret | De dónde sale |
-|---|---|
-| `MONSTERASP_WEBSITE_NAME` | `msdeploySite` del publish profile |
-| `MONSTERASP_SERVER` | `publishUrl` del publish profile |
-| `MONSTERASP_USERNAME` | `userName` del publish profile |
-| `MONSTERASP_PASSWORD` | `userPWD` del publish profile |
-| `RL_CONNECTION_STRING` | panel de MonsterASP → Databases |
-| `RL_ADMIN_KEY` | lo generás vos: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
-| `RL_IP_HASH_SALT` | ídem, y una vez cargado no se rota: rotarlo invalida los hashes guardados |
-
-El publish profile (`API/WebDeploy.publishSettings`) está en `.gitignore` y **no debe commitearse**.
-
-El app pool de MonsterASP corre en **x86**, así que el build es portable (sin `RuntimeIdentifier`
-ni `PublishReadyToRun`). Fijar `win-x64` hace que coreclr no cargue y el sitio responde 500.30 sin
-escribir un solo log. Tampoco se puede usar `System.GC.HeapHardLimit`: si el CLR no lo puede
-satisfacer, no inicializa.
-
-### Dos cosas que hay que hacer a mano en el panel
-
-1. **Activar HTTPS**: Domains → candado verde → Let's Encrypt → Enable HTTPS. Sin esto el front en
-   Pages (que es https) no puede llamar a la API por mixed content. En el plan gratuito **el
-   certificado se renueva a mano cada 90 días**.
-2. **GitHub Pages necesita el repo público** si la cuenta es Free: publicar Pages desde un repo
-   privado requiere plan pago.
-
-## Estado
-
-| Fase | Qué incluye | Estado |
-|---|---|---|
-| 0 | Esqueleto, esquema, health, CORS, workflows | listo |
-| 1 | Catálogo read-only: grilla, detalle, botón copiar | listo |
-| 2 | Metadata vía fxtwitter/vxtwitter + dedup en 3 capas | listo |
-| 3 | Publicación abierta, tags controlados, reportes | listo |
-| 4 | Tags, búsqueda y autocomplete | listo |
-| 5 | Output cache en disco, ETag, contador de copiados | pendiente |
-| 6 | Link rot, decay, prerender, backup | pendiente |
+Las restricciones del plan gratuito son lo que explica casi todas las decisiones de diseño:
+paginación keyset en vez de `OFFSET`, índices filtrados y covering, hash perceptual calculado en
+el browser, y nada de tablas con una fila por acción de usuario.
 
 ## Licencia
 
