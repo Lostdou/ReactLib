@@ -15,9 +15,10 @@ builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptio
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJson.Default));
 
+// sin throw al arrancar: una config incompleta no puede tumbar /api/health, que es lo que el
+// front usa para despertar el app pool. El problema se ve en /api/health/db
 builder.Services.AddSingleton<ISqlRunner>(_ =>
-    new SqlRunner(builder.Configuration.GetConnectionString("Db")
-        ?? throw new InvalidOperationException("Falta ConnectionStrings:Db")));
+    new SqlRunner(builder.Configuration.GetConnectionString("Db") ?? string.Empty));
 
 builder.Services.AddSingleton(sp => new VideoQueries(
     sp.GetRequiredService<ISqlRunner>(),
