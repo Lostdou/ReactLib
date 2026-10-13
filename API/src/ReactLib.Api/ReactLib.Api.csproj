@@ -22,11 +22,10 @@
     <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
   </PropertyGroup>
 
-  <!-- R2R recorta el JIT del arranque, que es lo que se paga en cada cold start del app pool -->
+  <!-- build portable, sin RID ni R2R: fijar win-x64 impide que coreclr cargue si el app pool
+       del hosting corre en 32 bits, y eso no lo controlamos desde acá -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <PublishReadyToRun>true</PublishReadyToRun>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 

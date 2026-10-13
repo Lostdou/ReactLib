@@ -1,6 +1,5 @@
 {
   "configProperties": {
-    "System.GC.HeapHardLimit": 100663296,
     "System.GC.ConserveMemory": 5,
     "System.GC.RetainVM": false,
     "System.Globalization.UseNls": true
