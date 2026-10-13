@@ -85,6 +85,11 @@ Secrets que hay que cargar en el repo (Settings → Secrets and variables → Ac
 
 El publish profile (`API/WebDeploy.publishSettings`) está en `.gitignore` y **no debe commitearse**.
 
+El app pool de MonsterASP corre en **x86**, así que el build es portable (sin `RuntimeIdentifier`
+ni `PublishReadyToRun`). Fijar `win-x64` hace que coreclr no cargue y el sitio responde 500.30 sin
+escribir un solo log. Tampoco se puede usar `System.GC.HeapHardLimit`: si el CLR no lo puede
+satisfacer, no inicializa.
+
 ### Dos cosas que hay que hacer a mano en el panel
 
 1. **Activar HTTPS**: Domains → candado verde → Let's Encrypt → Enable HTTPS. Sin esto el front en

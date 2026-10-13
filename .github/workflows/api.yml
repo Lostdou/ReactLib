@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  # prendido solo mientras diagnosticamos: en el plan gratuito estos logs se comen los 5 GB
-  STDOUT_LOG: 'true'
+  # prender solo para diagnosticar: en el plan gratuito estos logs se comen los 5 GB
+  STDOUT_LOG: 'false'
 
 jobs:
   deploy:
