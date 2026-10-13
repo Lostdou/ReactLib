@@ -47,7 +47,9 @@ public sealed class TweetMetadataResolver : ITweetMetadataResolver
                 mirror.RecordSuccess();
                 return metadata;
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            // el timeout de HttpClient llega como TaskCanceledException: solo propagamos la
+            // cancelacion real del request, si no un mirror lento devuelve 500 en vez de 400
+            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
             {
                 _log.LogWarning(ex, "{Mirror} no resolvió {TweetId}", mirror.Name, tweet.TweetId);
                 mirror.RecordFailure();

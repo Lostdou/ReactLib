@@ -51,7 +51,7 @@ public sealed class TagCatalog(ISqlRunner sql, ILogger<TagCatalog> log) : Backgr
 
             _tags = [.. rows];
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
             log.LogWarning(ex, "no se pudo refrescar el catálogo de tags");
         }
