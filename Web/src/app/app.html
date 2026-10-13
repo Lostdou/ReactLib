@@ -1,6 +1,17 @@
 <header class="site-header">
   <a class="brand" routerLink="/">ReactLib</a>
-  <a class="add" routerLink="/sumar">Sumar video</a>
+  <div class="header-actions">
+    <div class="langs" role="group" [attr.aria-label]="i18n.t().ariaLanguage">
+      @for (option of languages; track option.code) {
+        <button
+          type="button"
+          [class.active]="i18n.lang() === option.code"
+          (click)="setLang(option.code)"
+        >{{ option.label }}</button>
+      }
+    </div>
+    <a class="add" routerLink="/sumar">{{ i18n.t().addVideo }}</a>
+  </div>
 </header>
 
 <main class="site-main">
@@ -9,11 +20,11 @@
 
 <footer class="site-footer">
   <p class="credit">
-    Hecho por
+    {{ i18n.t().madeBy }}
     <a href="https://x.com/nosoylostdou" target="_blank" rel="noopener noreferrer">&#64;nosoylostdou</a>
   </p>
   <a [href]="hitsLink" target="_blank" rel="noopener noreferrer">
-    <img [src]="hitsBadge" alt="visitas" width="86" height="20" (error)="hideBadge($event)" />
+    <img [src]="hitsBadge" [attr.alt]="i18n.t().ariaVisits" width="86" height="20" (error)="hideBadge($event)" />
   </a>
 </footer>
 

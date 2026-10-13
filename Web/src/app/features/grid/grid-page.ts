@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogStore } from '../../core/catalog-store';
+import { I18n } from '../../core/i18n';
 import { GridQuery, GridSort } from '../../core/models';
 import { VideoCardComponent } from './video-card';
 
@@ -18,6 +19,7 @@ const SKELETON_COUNT = 8;
 })
 export class GridPageComponent {
   readonly store = inject(CatalogStore);
+  readonly i18n = inject(I18n);
   readonly search = signal('');
   readonly skeletons = Array.from({ length: SKELETON_COUNT });
 

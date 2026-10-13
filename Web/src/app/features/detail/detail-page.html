@@ -1,9 +1,9 @@
-<a class="back" routerLink="/">&#8592; Volver a la biblioteca</a>
+<a class="back" routerLink="/">&#8592; {{ i18n.t().back }}</a>
 
 @if (loading()) {
-  <div class="placeholder">Cargando…</div>
+  <div class="placeholder">{{ i18n.t().loading }}</div>
 } @else if (notFound()) {
-  <p class="placeholder">Ese video no existe o lo dimos de baja.</p>
+  <p class="placeholder">{{ i18n.t().notFound }}</p>
 } @else if (video(); as item) {
   <article class="detail">
     <div class="player" [style.aspect-ratio]="aspectRatio()">
@@ -12,7 +12,7 @@
       } @else if (item.posterUrl) {
         <img [src]="item.posterUrl" [alt]="item.title" />
       } @else {
-        <span class="no-media">Sin preview disponible</span>
+        <span class="no-media">{{ i18n.t().noPreview }}</span>
       }
     </div>
 
@@ -29,18 +29,15 @@
       }
 
       <div class="actions">
-        <button type="button" class="copy" (click)="copy()">Copiar link</button>
-        <a class="original" [href]="item.tweetUrl" target="_blank" rel="noopener noreferrer">Ver original en X</a>
+        <button type="button" class="copy" (click)="copy()">{{ i18n.t().copyLink }}</button>
+        <a class="original" [href]="item.tweetUrl" target="_blank" rel="noopener noreferrer">{{ i18n.t().seeOriginal }}</a>
       </div>
 
       <button type="button" class="report" [disabled]="reported()" (click)="report()">
-        {{ reported() ? 'Reportado' : 'Reportar este video' }}
+        {{ reported() ? i18n.t().reported : i18n.t().report }}
       </button>
 
-      <p class="hint">
-        Pegá el link en el texto de tu post en X y el video se adjunta solo, con la atribución a
-        &#64;{{ item.handle }}. No hace falta subir nada ni citar.
-      </p>
+      <p class="hint">{{ i18n.t().detailHint(item.handle) }}</p>
     </div>
   </article>
 }

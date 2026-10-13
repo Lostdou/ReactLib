@@ -2,28 +2,28 @@
   <input
     type="search"
     class="search"
-    placeholder="Buscar: gato, llanto, me voy..."
+    [placeholder]="i18n.t().searchPlaceholder"
     autocomplete="off"
     [value]="search()"
     (input)="onSearchInput($any($event.target).value)"
   />
 
-  <div class="sorts" role="group" aria-label="Orden">
-    <button type="button" [class.active]="store.query().sort === 'new'" (click)="setSort('new')">Recientes</button>
-    <button type="button" [class.active]="store.query().sort === 'top'" (click)="setSort('top')">Más usados</button>
+  <div class="sorts" role="group" [attr.aria-label]="i18n.t().ariaSort">
+    <button type="button" [class.active]="store.query().sort === 'new'" (click)="setSort('new')">{{ i18n.t().sortNew }}</button>
+    <button type="button" [class.active]="store.query().sort === 'top'" (click)="setSort('top')">{{ i18n.t().sortTop }}</button>
   </div>
 </section>
 
 @if (store.query().tag) {
   <p class="active-filter">
-    Filtrando por <strong>#{{ store.query().tag }}</strong>
-    <button type="button" (click)="clearTag()">quitar</button>
+    {{ i18n.t().filteringBy }} <strong>#{{ store.query().tag }}</strong>
+    <button type="button" (click)="clearTag()">{{ i18n.t().removeFilter }}</button>
   </p>
 }
 
 @if (store.slowness() !== 'none') {
   <p class="waking">
-    {{ store.slowness() === 'waking' ? 'Despertando el servidor, va a tardar unos segundos…' : 'Sigue despertando… ya falta poco.' }}
+    {{ store.slowness() === 'waking' ? i18n.t().waking : i18n.t().stillWaking }}
   </p>
 }
 
@@ -39,8 +39,8 @@
   </div>
 } @else if (store.isEmpty() && !store.error()) {
   <p class="empty">
-    No hay nada con esa búsqueda todavía.
-    <a routerLink="/" [queryParams]="{ q: null, tag: null }">Ver todo</a>
+    {{ i18n.t().emptyState }}
+    <a routerLink="/" [queryParams]="{ q: null, tag: null }">{{ i18n.t().seeAll }}</a>
   </p>
 } @else {
   <div class="grid">
@@ -51,7 +51,7 @@
 
   @if (store.hasMore()) {
     <button type="button" class="more" [disabled]="store.loadingMore()" (click)="store.loadMore()">
-      {{ store.loadingMore() ? 'Cargando…' : 'Cargar más' }}
+      {{ store.loadingMore() ? i18n.t().loadingMore : i18n.t().loadMore }}
     </button>
   }
 }

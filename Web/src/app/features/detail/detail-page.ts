@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { I18n } from '../../core/i18n';
 import { copyText } from '../../core/clipboard';
 import { VideoCard } from '../../core/models';
 import { Toast } from '../../core/toast';
@@ -24,6 +25,8 @@ export class DetailPageComponent {
     return current?.width && current?.height ? `${current.width} / ${current.height}` : '1 / 1';
   });
 
+  readonly i18n = inject(I18n);
+
   private readonly api = inject(Api);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(Toast);
@@ -39,10 +42,8 @@ export class DetailPageComponent {
     if (!current) return;
 
     const copied = await copyText(current.copyUrl);
-    this.toast.show(
-      copied ? 'Link copiado: pegalo en el texto de tu post' : 'No se pudo copiar',
-      copied ? 'ok' : 'error',
-    );
+    const t = this.i18n.t();
+    this.toast.show(copied ? t.copied : t.copyFailed, copied ? 'ok' : 'error');
   }
 
   async report(): Promise<void> {
@@ -52,9 +53,9 @@ export class DetailPageComponent {
     this.reported.set(true);
     try {
       await this.api.report(current.seq);
-      this.toast.show('Gracias: lo vamos a revisar');
+      this.toast.show(this.i18n.t().reportThanks);
     } catch {
-      this.toast.show('No se pudo enviar el reporte', 'error');
+      this.toast.show(this.i18n.t().reportFailed, 'error');
       this.reported.set(false);
     }
   }

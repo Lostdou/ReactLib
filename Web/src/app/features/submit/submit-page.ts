@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Api } from '../../core/api';
+import { I18n } from '../../core/i18n';
 import { dhashFromPoster } from '../../core/dhash';
 import { SubmitResponse, TagSuggestion, VideoPreview } from '../../core/models';
 import { Toast } from '../../core/toast';
@@ -33,6 +34,8 @@ export class SubmitPageComponent {
   readonly isKnownTag = computed(() =>
     this.suggestions().some((s) => s.name === this.normalized()),
   );
+
+  readonly i18n = inject(I18n);
 
   private readonly api = inject(Api);
   private readonly toast = inject(Toast);
@@ -136,20 +139,19 @@ export class SubmitPageComponent {
   }
 
   private messageFor(failure: unknown): string {
-    if (!(failure instanceof HttpErrorResponse)) return 'Algo falló. Probá de nuevo.';
+    const t = this.i18n.t();
+    if (!(failure instanceof HttpErrorResponse)) return t.errorGeneric;
+    if (failure.status === 429) return t.errorRateLimited;
 
-    const outcome = (failure.error as SubmitResponse | null)?.outcome;
-    if (failure.status === 429) return 'Enviaste varios seguidos. Esperá un rato.';
-
-    switch (outcome) {
+    switch ((failure.error as SubmitResponse | null)?.outcome) {
       case 'InvalidUrl':
-        return 'Ese link no parece un post de X.';
+        return t.errorInvalidUrl;
       case 'AlreadyExists':
-        return 'Ese video ya está en la biblioteca.';
+        return t.errorAlreadyExists;
       case 'NoVideoFound':
-        return 'No encontramos ningún video en ese post.';
+        return t.errorNoVideo;
       default:
-        return 'No pudimos procesarlo. Probá de nuevo en un minuto.';
+        return t.errorProcessing;
     }
   }
 }

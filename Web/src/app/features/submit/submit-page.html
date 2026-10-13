@@ -1,9 +1,7 @@
-<a class="back" routerLink="/">&#8592; Volver a la biblioteca</a>
+<a class="back" routerLink="/">&#8592; {{ i18n.t().back }}</a>
 
-<h2>Sumar un video</h2>
-<p class="lead">
-  Pegá el link de un post de X que tenga el video que querés agregar. Se publica al instante.
-</p>
+<h2>{{ i18n.t().submitTitle }}</h2>
+<p class="lead">{{ i18n.t().submitLead }}</p>
 
 @if (error(); as message) {
   <p class="error">{{ message }}</p>
@@ -14,14 +12,14 @@
     <form class="url-form" (submit)="$event.preventDefault(); resolve()">
       <input
         type="url"
-        placeholder="https://x.com/usuario/status/123456789"
+        [placeholder]="i18n.t().urlPlaceholder"
         autocomplete="off"
         required
         [value]="url()"
         (input)="url.set($any($event.target).value)"
       />
       <button type="submit" [disabled]="busy() || !url().trim()">
-        {{ busy() ? 'Buscando…' : 'Buscar video' }}
+        {{ busy() ? i18n.t().searching : i18n.t().findVideo }}
       </button>
     </form>
   }
@@ -41,18 +39,15 @@
       </div>
     }
 
-    <h3>Elegí hasta 5 tags</h3>
-    <p class="hint">
-      Usá los que ya existen siempre que puedas: así la gente encuentra las cosas. Si proponés uno
-      nuevo, el video se publica igual y el tag queda esperando revisión.
-    </p>
+    <h3>{{ i18n.t().chooseTags }}</h3>
+    <p class="hint">{{ i18n.t().tagsHint }}</p>
 
     @if (chosenTags().length) {
       <ul class="chosen">
         @for (tag of chosenTags(); track tag) {
           <li>
             #{{ tag }}
-            <button type="button" (click)="removeTag(tag)" aria-label="Quitar">&#215;</button>
+            <button type="button" (click)="removeTag(tag)" [attr.aria-label]="i18n.t().ariaRemoveTag">&#215;</button>
           </li>
         }
       </ul>
@@ -62,7 +57,7 @@
       <input
         class="tag-input"
         type="text"
-        placeholder="Buscar o proponer un tag…"
+        [placeholder]="i18n.t().tagPlaceholder"
         autocomplete="off"
         [value]="tagInput()"
         (input)="onTagInput($any($event.target).value)"
@@ -81,7 +76,7 @@
         @if (normalized().length > 1 && !isKnownTag()) {
           <li>
             <button type="button" class="new" (click)="addTag(normalized())">
-              proponer #{{ normalized() }}
+              {{ i18n.t().propose }} #{{ normalized() }}
             </button>
           </li>
         }
@@ -90,35 +85,35 @@
 
     <div class="actions">
       <button type="button" class="primary" [disabled]="busy()" (click)="submit()">
-        {{ busy() ? 'Publicando…' : 'Publicar' }}
+        {{ busy() ? i18n.t().publishing : i18n.t().publish }}
       </button>
-      <button type="button" (click)="restart()">Cancelar</button>
+      <button type="button" (click)="restart()">{{ i18n.t().cancel }}</button>
     </div>
   }
 
   @case ('done') {
     @if (result(); as response) {
       <div class="done">
-        <h3>¡Listo, ya está en la biblioteca!</h3>
+        <h3>{{ i18n.t().published }}</h3>
 
         @if (response.seq) {
-          <a class="primary" [routerLink]="['/v', response.seq]">Ver el video</a>
+          <a class="primary" [routerLink]="['/v', response.seq]">{{ i18n.t().seeVideo }}</a>
         }
 
         @if (response.proposedTags?.length) {
           <p class="hint">
-            Estos tags todavía no existían y quedaron esperando revisión:
+            {{ i18n.t().proposedPending }}
             @for (tag of response.proposedTags; track tag) { <strong>#{{ tag }}</strong> }
           </p>
         }
 
         @if (response.possibleDuplicate; as duplicate) {
           <p class="hint">
-            Puede que sea parecido a <a [routerLink]="['/v', duplicate.seq]">{{ duplicate.title }}</a>.
+            {{ i18n.t().maybeDuplicate }} <a [routerLink]="['/v', duplicate.seq]">{{ duplicate.title }}</a>.
           </p>
         }
 
-        <button type="button" (click)="restart()">Sumar otro</button>
+        <button type="button" (click)="restart()">{{ i18n.t().addAnother }}</button>
       </div>
     }
   }

@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Api } from './api';
+import { I18n } from './i18n';
 import { readCachedPage, writeCachedPage } from './catalog-cache';
 import { GridQuery, VideoCard } from './models';
 
@@ -11,6 +12,7 @@ export type Slowness = 'none' | 'waking' | 'stillWaking';
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
   private readonly api = inject(Api);
+  private readonly i18n = inject(I18n);
 
   readonly items = signal<VideoCard[]>([]);
   readonly loading = signal(false);
@@ -52,7 +54,7 @@ export class CatalogStore {
       writeCachedPage(query, page);
     } catch {
       if (id !== this.requestId) return;
-      if (this.items().length === 0) this.error.set('No pudimos cargar la biblioteca.');
+      if (this.items().length === 0) this.error.set(this.i18n.t().loadError);
     } finally {
       if (id === this.requestId) {
         this.loading.set(false);
@@ -71,7 +73,7 @@ export class CatalogStore {
       this.items.update((current) => [...current, ...page.items]);
       this.cursor.set(page.next);
     } catch {
-      this.error.set('No pudimos traer más resultados.');
+      this.error.set(this.i18n.t().loadMoreError);
     } finally {
       this.loadingMore.set(false);
     }

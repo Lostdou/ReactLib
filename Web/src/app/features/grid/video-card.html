@@ -31,7 +31,7 @@
   </div>
 
   <div class="actions">
-    <button type="button" class="copy" (click)="copy()">Copiar link</button>
-    <a class="original" [href]="video().tweetUrl" target="_blank" rel="noopener noreferrer">Original</a>
+    <button type="button" class="copy" (click)="copy()">{{ i18n.t().copyLink }}</button>
+    <a class="original" [href]="video().tweetUrl" target="_blank" rel="noopener noreferrer">{{ i18n.t().original }}</a>
   </div>
 </article>

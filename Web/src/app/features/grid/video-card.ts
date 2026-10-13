@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { copyText } from '../../core/clipboard';
+import { I18n } from '../../core/i18n';
 import { VideoCard } from '../../core/models';
 import { Preview } from '../../core/preview';
 import { Toast } from '../../core/toast';
@@ -14,6 +15,8 @@ import { Toast } from '../../core/toast';
 })
 export class VideoCardComponent {
   readonly video = input.required<VideoCard>();
+
+  readonly i18n = inject(I18n);
 
   private readonly preview = inject(Preview);
   private readonly toast = inject(Toast);
@@ -44,9 +47,7 @@ export class VideoCardComponent {
 
   async copy(): Promise<void> {
     const copied = await copyText(this.video().copyUrl);
-    this.toast.show(
-      copied ? 'Link copiado: pegalo en el texto de tu post' : 'No se pudo copiar',
-      copied ? 'ok' : 'error',
-    );
+    const t = this.i18n.t();
+    this.toast.show(copied ? t.copied : t.copyFailed, copied ? 'ok' : 'error');
   }
 }
