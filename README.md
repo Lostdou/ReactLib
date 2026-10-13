@@ -62,6 +62,24 @@ numeración a propósito: los TweetId son inventados y no resuelven a nada.
 > `<meta name="referrer" content="no-referrer">`: sin eso no se reproduce ningún video. El CDN de
 > imágenes (`pbs.twimg.com`) no tiene esa restricción.
 
+## Cómo entra el contenido
+
+Cualquiera publica sin registrarse desde `/sumar`: pega el link de un post de X, el servidor resuelve
+el video y se publica al instante. Lo que **no** es libre son los tags.
+
+- Un tag que ya existe se aplica solo.
+- Uno que no existe **no se crea**: queda en `Video.ProposedTags` y el video se publica igual. Recién
+  nace cuando se aprueba desde `/api/admin/proposed-tags`, y ahí se enlaza a todos los videos que lo
+  habían propuesto.
+- Tres reportes devuelven un video a pendiente y lo sacan de la grilla sin intervención.
+- Rate limit de 10 envíos por hora por IP.
+
+**Why:** sin esa compuerta la taxonomía se llena de sinónimos en una semana y la búsqueda deja de
+servir, que es justo lo que hace útil a una biblioteca.
+
+> Los scripts de `API/db/` **no se aplican solos en el deploy**: hay que correrlos a mano contra la
+> base de producción antes de desplegar código que los use.
+
 ## Deploy
 
 Dos workflows independientes, cada uno disparado por cambios en su carpeta:
@@ -105,7 +123,7 @@ satisfacer, no inicializa.
 | 0 | Esqueleto, esquema, health, CORS, workflows | listo |
 | 1 | Catálogo read-only: grilla, detalle, botón copiar | listo |
 | 2 | Metadata vía fxtwitter/vxtwitter + dedup en 3 capas | listo |
-| 3 | Ingesta pública con moderación | pendiente |
-| 4 | Tags, búsqueda y autocomplete | parcial (falta autocomplete) |
+| 3 | Publicación abierta, tags controlados, reportes | listo |
+| 4 | Tags, búsqueda y autocomplete | listo |
 | 5 | Output cache en disco, ETag, contador de copiados | pendiente |
 | 6 | Link rot, decay, prerender, backup | pendiente |
