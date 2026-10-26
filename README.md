@@ -1,9 +1,5 @@
 # ReactLib
 
-[![visitas](https://hits.sh/reactlib.lostdou.dev.svg?style=flat-square&label=visitas)](https://hits.sh/reactlib.lostdou.dev/)
-
-**[reactlib.lostdou.dev](https://reactlib.lostdou.dev)**
-
 Catálogo buscable de videos de reacción de X. Copiás el link de un video, lo pegás en el texto de
 tu post y **X adjunta ese video ya subido**, con la atribución nativa al autor en el reproductor,
 sin re-subir nada y sin citar.
